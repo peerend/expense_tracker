@@ -25,6 +25,14 @@ class Expense
   results
   end
 
+  def self.total
+    total = 0
+    self.all.each do |expense|
+      total += expense.cost
+    end
+    total
+  end
+
   def edit_name name
     DB.exec("UPDATE expenses SET name = '#{name}' WHERE id = #{self.id};")
   end
@@ -81,4 +89,22 @@ class Expense
     end
     dates
   end
+
+  def self.category_total cat_select
+    total = 0
+    self.all.each do |expense|
+      if expense.show_category.include?(cat_select)
+        total += expense.cost
+      end
+    end
+    total
+  end
+
+  def self.category_percent cat_select
+    percent = 0
+    percent = self.category_total(cat_select) / self.total * 100
+    percent
+  end
 end
+
+

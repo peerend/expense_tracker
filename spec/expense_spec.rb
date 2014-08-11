@@ -14,6 +14,16 @@ describe 'expense' do
     end
   end
 
+  describe '.total' do
+    it 'determines the total cost of all expenses' do
+      test_expense1 = Expense.new({:name => "Burger", :cost => 5.50})
+      test_expense1.save
+      test_expense2 = Expense.new({:name => "Shake", :cost => 2.25})
+      test_expense2.save
+      expect(Expense.total).to eq 7.75
+    end
+  end
+
   describe '#save' do
     it 'saves an expense to the expenses table' do
       test_expense = Expense.new({:name => "Burger", :cost => 5.50})
@@ -61,6 +71,7 @@ describe 'expense' do
       expect(test_expense.show_category).to eq ["Dining"]
     end
   end
+
   describe '#add_purchase_date' do
     it 'adds a purchase_date to an expense' do
       test_expense = Expense.new({:name => "Burger", :cost => 5.50})
@@ -69,6 +80,65 @@ describe 'expense' do
       test_purchase_date.save
       test_expense.add_purchase_date(test_purchase_date.id)
       expect(test_expense.show_date).to eq ["11/05/2014"]
+    end
+  end
+
+  describe '.category_total' do
+    it 'sums expenses by category' do
+      test_expense = Expense.new({:name => "Burger", :cost => 5.50})
+      test_expense.save
+      test_expense2 = Expense.new({:name => "Cheese Burger", :cost => 6.25})
+      test_expense2.save
+      test_expense3 = Expense.new({:name => "Gundam Wing", :cost => 7.50})
+      test_expense3.save
+      test_category = Category.new({:name => "Dining"})
+      test_category.save
+      test_category2 = Category.new({:name => "Entertainment"})
+      test_category2.save
+      test_expense.add_category(test_category.id)
+      test_expense2.add_category(test_category.id)
+      test_expense3.add_category(test_category2.id)
+      expect(Expense.category_total('Dining')).to eq 11.75
+    end
+  end
+
+  describe '.category_percent' do
+    it 'determines the percentage spent on a selected category' do
+      test_expense = Expense.new({:name => "Burger", :cost => 2})
+      test_expense.save
+      test_expense2 = Expense.new({:name => "Cheese Burger", :cost => 3})
+      test_expense2.save
+      test_expense3 = Expense.new({:name => "Gundam Wing", :cost => 5})
+      test_expense3.save
+      test_category = Category.new({:name => "Dining"})
+      test_category.save
+      test_category2 = Category.new({:name => "Entertainment"})
+      test_category2.save
+      test_expense.add_category(test_category.id)
+      test_expense.add_category(test_category2.id)
+      test_expense2.add_category(test_category.id)
+      test_expense3.add_category(test_category2.id)
+      expect(Expense.category_percent('Entertainment')).to eq 70
+    end
+  end
+
+
+  describe '#add_category' do
+    it 'enables multiple category input' do
+      test_expense = Expense.new({:name => "Burger", :cost => 2})
+      test_expense.save
+      test_expense2 = Expense.new({:name => "Cheese Burger", :cost => 3})
+      test_expense2.save
+      test_expense3 = Expense.new({:name => "Gundam Wing", :cost => 5})
+      test_expense3.save
+      test_category = Category.new({:name => "Dining"})
+      test_category.save
+      test_category2 = Category.new({:name => "Entertainment"})
+      test_category2.save
+      test_expense.add_category(test_category.id)
+      test_expense.add_category(test_category2.id)
+      test_expense3.add_category(test_category2.id)
+      expect(test_expense.show_category).to eq ['Dining', 'Entertainment']
     end
   end
 end
