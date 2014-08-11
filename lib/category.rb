@@ -1,0 +1,3 @@
+class Category < Wallet
+
+end
