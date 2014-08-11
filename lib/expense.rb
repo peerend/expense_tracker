@@ -43,10 +43,6 @@ class Expense
     target_object
   end
 
-  def add_role author_id
-    DB.exec("INSERT INTO authors_roles (author_id, role_id) VALUES (#{author_id}, #{self.id});")
-  end
-
   def add_company company_id
     DB.exec("INSERT INTO expense_company (expense_id, company_id) VALUES (#{self.id}, #{company_id});")
   end
@@ -58,5 +54,31 @@ class Expense
       companies << company['name']
     end
     companies
+  end
+
+  def add_category category_id
+    DB.exec("INSERT INTO expense_category (expense_id, category_id) VALUES (#{self.id}, #{category_id});")
+  end
+
+  def show_category
+    categories = []
+    results = DB.exec("SELECT categorys.name FROM categorys JOIN expense_category ON (expense_category.category_id = categorys.id) WHERE expense_id = #{self.id};")
+    results.each do |category|
+      categories << category['name']
+    end
+    categories
+  end
+
+  def add_purchase_date purchase_date_id
+    DB.exec("INSERT INTO expense_date (expense_id, purchase_date_id) VALUES (#{self.id}, #{purchase_date_id});")
+  end
+
+  def show_date
+    dates = []
+    results = DB.exec("SELECT purchase_dates.name FROM purchase_dates JOIN expense_date ON (expense_date.purchase_date_id = purchase_dates.id) WHERE expense_id = #{self.id};")
+    results.each do |purchase_date|
+      dates << purchase_date['name']
+    end
+    dates
   end
 end
