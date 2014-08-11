@@ -1,4 +1,4 @@
-class Expense
+class Expense < Wallet
 
   attr_reader :name, :id, :cost
 
@@ -11,10 +11,6 @@ class Expense
   def save
     result = DB.exec("INSERT INTO expenses (name, cost) VALUES ('#{self.name}', #{self.cost}) RETURNING id;")
     @id = result.first['id'].to_i
-  end
-
-  def delete
-    DB.exec("DELETE FROM expenses WHERE id = '#{self.id}';")
   end
 
   def self.all
@@ -33,22 +29,8 @@ class Expense
     total
   end
 
-  def edit_name name
-    DB.exec("UPDATE expenses SET name = '#{name}' WHERE id = #{self.id};")
-  end
-
   def edit_cost cost
     DB.exec("UPDATE expenses SET cost = '#{cost}' WHERE id = #{self.id};")
-  end
-
-  def == name
-    name == self.name
-  end
-
-  def self.by_id id
-    result = DB.exec("SELECT * FROM #{self.to_s.downcase + 's'} WHERE id = '#{id}';")[0]
-    target_object = self.new({:name => result['name'], :id => result['id']})
-    target_object
   end
 
   def add_company company_id
@@ -93,9 +75,43 @@ class Expense
   def self.category_total cat_select
     total = 0
     self.all.each do |expense|
-      if expense.show_category.include?(cat_select)
+       if expense.show_category.include?(cat_select)
         total += expense.cost
       end
+    end
+    total
+  end
+
+  def self.category_ids cat_select
+    cat_expenses_id = []
+    self.all.each do |expense|
+       if expense.show_category.include?(cat_select)
+        cat_expenses_id << expense.id.to_i
+      end
+    end
+    cat_expenses_id
+  end
+
+  def self.company_ids comp_select
+    comp_expenses_id = []
+    self.all.each do |expense|
+       if expense.show_company.include?(comp_select)
+        comp_expenses_id << expense.id.to_i
+      end
+    end
+    comp_expenses_id
+  end
+
+  def self.cost_by_company cat_select, company_name
+    cat_array = []
+    comp_array = []
+    total = 0
+    cat_array = Expense.category_ids(cat_select)
+    comp_array = Expense.company_ids(company_name)
+    intersec = cat_array & comp_array
+    intersec.each do |item|
+      result = DB.exec("SELECT cost FROM expenses WHERE id = #{item};")
+      total += result.first["cost"].to_f
     end
     total
   end

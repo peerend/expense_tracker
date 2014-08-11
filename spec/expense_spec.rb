@@ -32,11 +32,11 @@ describe 'expense' do
     end
   end
 
-  describe '#edit_name' do
+  describe '#edit' do
     it 'edits an expense name on the expenses table' do
       test_expense = Expense.new({:name => "Burger", :cost => 5.50})
       test_expense.save
-      test_expense.edit_name('Cheese Burger')
+      test_expense.edit('Cheese Burger')
       expect(Expense.all[0].name).to eq 'Cheese Burger'
     end
   end
@@ -76,10 +76,10 @@ describe 'expense' do
     it 'adds a purchase_date to an expense' do
       test_expense = Expense.new({:name => "Burger", :cost => 5.50})
       test_expense.save
-      test_purchase_date = Purchase_date.new({:name => "11/05/2014"})
+      test_purchase_date = Purchase_date.new({:name => 20141105})
       test_purchase_date.save
       test_expense.add_purchase_date(test_purchase_date.id)
-      expect(test_expense.show_date).to eq ["11/05/2014"]
+      expect(test_expense.show_date[0]).to eq "2014-11-05"
     end
   end
 
@@ -139,6 +139,49 @@ describe 'expense' do
       test_expense.add_category(test_category2.id)
       test_expense3.add_category(test_category2.id)
       expect(test_expense.show_category).to eq ['Dining', 'Entertainment']
+    end
+  end
+
+  describe '.category_ids' do
+    it 'creates an array of expenses by category' do
+      test_expense = Expense.new({:name => "Burger", :cost => 5.50})
+      test_expense.save
+      test_expense2 = Expense.new({:name => "Cheese Burger", :cost => 6.25})
+      test_expense2.save
+      test_expense3 = Expense.new({:name => "Gundam Wing", :cost => 7.50})
+      test_expense3.save
+      test_category = Category.new({:name => "Dining"})
+      test_category.save
+      test_category2 = Category.new({:name => "Entertainment"})
+      test_category2.save
+      test_expense.add_category(test_category.id)
+      test_expense2.add_category(test_category.id)
+      test_expense3.add_category(test_category2.id)
+      expect(Expense.category_ids('Dining')).to eq [test_expense.id, test_expense2.id]
+
+    end
+  end
+
+  describe '.cost_by_company' do
+    it 'calculates total spent within a category on a company' do
+      test_expense = Expense.new({:name => "Burger", :cost => 5.50})
+      test_expense.save
+      test_expense2 = Expense.new({:name => "Cheese Burger", :cost => 6.25})
+      test_expense2.save
+      test_expense3 = Expense.new({:name => "Gundam Wing", :cost => 7.50})
+      test_expense3.save
+      test_category = Category.new({:name => "Dining"})
+      test_category.save
+      test_category2 = Category.new({:name => "Entertainment"})
+      test_category2.save
+      test_company = Company.new({:name => "BK"})
+      test_company.save
+      test_expense.add_category(test_category.id)
+      test_expense2.add_category(test_category.id)
+      test_expense3.add_category(test_category.id)
+      test_expense.add_company(test_company.id)
+      test_expense3.add_company(test_company.id)
+      expect(Expense.cost_by_company('Dining', 'BK')).to eq 13
     end
   end
 end
